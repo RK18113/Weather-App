@@ -1,46 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 function WeatherBoard() {
   const [city, setCity] = useState('');
   const [weatherData, setWeatherData] = useState(null);
   const key = 'db635712e9667e034baa107ae8e1dabc';
 
-  useEffect(() => {
-    if (city) {
-      fetchWeatherData();
-    }
-  }, [city]);
-
   async function fetchWeatherData() {
-    const locationResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${key}`);
-    const locationData = await locationResponse.json();
-
-    if (locationData.length > 0) {
-      const { lat, lon } = locationData[0];
-      const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}`);
-      const weatherData = await weatherResponse.json();
-
-      setWeatherData(weatherData);
+    try {
+      const locationResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${key}`);
+      const locationData = await locationResponse.json();
+  
+      if (locationData.length > 0) {
+        const { lat, lon } = locationData[0];
+        const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}`);
+        const weatherData = await weatherResponse.json();
+  
+        setWeatherData(weatherData);
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const cityInput = e.target.elements.cityInput.value;
-    setCity(cityInput);
-  };
-
   return (
     <div className='flex flex-col justify-center items-center h-screen w-screen bg-[#5B84B1FF]'>
-      <form onSubmit={handleSubmit} className='mb-4'>
+      <div className='mb-4'>
         <input
           type="text"
           name="cityInput"
           placeholder="Enter city name"
           className='p-2 border rounded'
+          onChange={(event) => {setCity(event.target.value)}}
         />
-        <button type="submit" className='ml-2 p-2 bg-[#5B8BFF] text-white rounded'>Search</button>
-      </form>
+        <button type="submit" className='ml-2 p-2 bg-[#5B8BFF] text-white rounded' onClick={fetchWeatherData}>Search</button>
+      </div>
 
       {weatherData && (
         <div className='h-[600px] w-[600px] bg-[#5B8BFF] rounded-3xl flex flex-col items-center justify-center'>
